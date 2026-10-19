@@ -1,0 +1,453 @@
+{
+  "info": {
+    "_postman_id": "tutor-book-session-api-2026",
+    "name": "Tutor Book API Collection",
+    "description": "Complete Postman Collection for Teacher-User Session Booking Backend API.\nIncludes full Request Bodies, Query Parameters, Authorization Bearer Headers, URL Parameters, and Automation Test Scripts.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0. System & Health",
+      "item": [
+        {
+          "name": "Health Check Endpoint",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "health"]
+            },
+            "description": "Verify that the Tutor Book backend server and v1 routing are running healthy."
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Authentication & Users",
+      "item": [
+        {
+          "name": "API 1 - Create User (Register)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.items && response.items._id) {",
+                  "    pm.collectionVariables.set('userId', response.items._id);",
+                  "    console.log('Auto-saved userId:', response.items._id);",
+                  "}",
+                  "pm.test('Status code is 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john.doe@example.com\",\n  \"phone\": \"+919876543210\",\n  \"password\": \"Password@123\",\n  \"role\": \"USER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "description": "API 1: Creates a new user with unique email and bcrypt encrypted password.\nAutomatically extracts and saves `userId` into collection variables upon 201 Created response."
+          }
+        },
+        {
+          "name": "Auth - User Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.items && response.items.token) {",
+                  "    pm.collectionVariables.set('authToken', response.items.token);",
+                  "    pm.collectionVariables.set('userId', response.items.userId);",
+                  "    console.log('Auto-saved authToken and userId');",
+                  "}",
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@example.com\",\n  \"password\": \"Password@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Logs in user with email & password, returning JWT access token.\nAuto-saves `authToken` to collection variable for Bearer token authorization in subsequent requests."
+          }
+        },
+        {
+          "name": "API 6 - User Session List (Aggregation)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "JWT Bearer Token"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}", "sessions"]
+            },
+            "description": "API 6: Returns all sessions for the given user ID separated into 'Upcoming Sessions' (status: BOOKED) and 'Completed Sessions' (status: COMPLETED).\nMandatory: Implemented using MongoDB Aggregation Pipeline ($facet)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Teachers",
+      "item": [
+        {
+          "name": "Create Teacher (Helper)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.items && response.items._id) {",
+                  "    pm.collectionVariables.set('teacherId', response.items._id);",
+                  "    console.log('Auto-saved teacherId:', response.items._id);",
+                  "}",
+                  "pm.test('Status code is 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "JWT Bearer Token"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Dr. Alan Turing\",\n  \"email\": \"alan.turing@example.com\",\n  \"specialization\": \"Data Structures & Algorithms\",\n  \"experience\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/teachers",
+              "host": ["{{baseUrl}}"],
+              "path": ["teachers"]
+            },
+            "description": "Helper endpoint to create a Teacher record in MongoDB.\nAuto-saves `teacherId` variable for session creation in API 2."
+          }
+        },
+        {
+          "name": "List All Teachers (Helper)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "JWT Bearer Token"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/teachers",
+              "host": ["{{baseUrl}}"],
+              "path": ["teachers"]
+            },
+            "description": "Returns list of all teachers in the database."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Sessions",
+      "item": [
+        {
+          "name": "API 2 - Create Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.items && response.items._id) {",
+                  "    pm.collectionVariables.set('sessionId', response.items._id);",
+                  "    console.log('Auto-saved sessionId:', response.items._id);",
+                  "}",
+                  "pm.test('Status code is 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "JWT Bearer Token"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teacherId\": \"{{teacherId}}\",\n  \"startTime\": \"2026-10-25T10:00:00.000Z\",\n  \"endTime\": \"2026-10-25T11:00:00.000Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions"]
+            },
+            "description": "API 2: Creates a new session for a teacher.\nRules:\n• Teacher must exist.\n• Default status is AVAILABLE.\n• Validates that endTime is strictly greater than startTime."
+          }
+        },
+        {
+          "name": "API 3 - Available Sessions for Booking (Aggregation)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "JWT Bearer Token"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sessions/available?dateTimestamp=2026-10-25",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "available"],
+              "query": [
+                {
+                  "key": "dateTimestamp",
+                  "value": "2026-10-25",
+                  "description": "Target date filter (accepts ISO date string 'YYYY-MM-DD' or epoch timestamp in ms/seconds)"
+                }
+              ]
+            },
+            "description": "API 3: Return all AVAILABLE sessions for the supplied date.\nMandatory: Implemented using MongoDB Aggregation Pipeline ($match, $lookup, $unwind, $sort)."
+          }
+        },
+        {
+          "name": "API 4 - Book Session",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "JWT Bearer Token"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{sessionId}}/book",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{sessionId}}", "book"]
+            },
+            "description": "API 4: Books an available session for a user.\nRules:\n• User must exist.\n• Session must exist.\n• Only AVAILABLE sessions can be booked.\n• A booked session cannot be booked again (returns 400 Bad Request).\n• Updates session status to BOOKED and links userId."
+          }
+        },
+        {
+          "name": "API 5 - Mark Session Complete",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text",
+                "description": "JWT Bearer Token"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/sessions/{{sessionId}}/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["sessions", "{{sessionId}}", "complete"]
+            },
+            "description": "API 5: Marks a session as complete.\nRules:\n• Session must exist.\n• Only BOOKED sessions can be marked as completed.\n• Updates status to COMPLETED and sets completedAt timestamp."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "teacherId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sessionId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
