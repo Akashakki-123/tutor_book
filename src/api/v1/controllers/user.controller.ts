@@ -1,10 +1,7 @@
-import { Request, Response } from 'express';
-import { badRequest, created, success, unknownError } from '../helpers/response.helper.js';
-import { addUser, getUserSessions } from '../helpers/user.helper.js';
+import { Request, Response } from "express";
+import { badRequest, created, success, unknownError } from "../helpers/response.helper.js";
+import { addUser, getUserSessions } from "../helpers/user.helper.js";
 
-/**
- * API 1: POST /users
- */
 export async function saveUser(req: Request, res: Response): Promise<Response> {
   try {
     const { status, message, data } = await addUser(req);
@@ -14,15 +11,12 @@ export async function saveUser(req: Request, res: Response): Promise<Response> {
   }
 }
 
-/**
- * API 6: GET /users/:id/sessions
- */
 export async function getUserSessionList(req: Request, res: Response): Promise<Response> {
   try {
     const id = req.params.id;
     const userId = Array.isArray(id) ? id[0] : id;
     if (!userId) {
-      return badRequest(res, 'User ID is required');
+      return badRequest(res, "User ID is required");
     }
     const { status, message, data } = await getUserSessions(userId);
     return status ? success(res, message, data) : badRequest(res, message);
@@ -30,4 +24,3 @@ export async function getUserSessionList(req: Request, res: Response): Promise<R
     return unknownError(res, error);
   }
 }
-

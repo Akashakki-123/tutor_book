@@ -1,6 +1,6 @@
-import { model, Schema, Document, Types } from 'mongoose';
+import { model, Schema, Document, Types } from "mongoose";
 
-export type SessionStatus = 'AVAILABLE' | 'BOOKED' | 'COMPLETED';
+export type SessionStatus = "AVAILABLE" | "BOOKED" | "COMPLETED";
 
 export interface ISession extends Document {
   teacherId: Types.ObjectId;
@@ -17,26 +17,26 @@ const sessionSchema = new Schema<ISession>(
   {
     teacherId: {
       type: Schema.Types.ObjectId,
-      ref: 'Teacher',
-      required: [true, 'teacherId is required'],
+      ref: "Teacher",
+      required: [true, "teacherId is required"],
     },
     userId: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       default: null,
     },
     startTime: {
       type: Date,
-      required: [true, 'startTime is required'],
+      required: [true, "startTime is required"],
     },
     endTime: {
       type: Date,
-      required: [true, 'endTime is required'],
+      required: [true, "endTime is required"],
     },
     status: {
       type: String,
-      enum: ['AVAILABLE', 'BOOKED', 'COMPLETED'],
-      default: 'AVAILABLE',
+      enum: ["AVAILABLE", "BOOKED", "COMPLETED"],
+      default: "AVAILABLE",
     },
     completedAt: {
       type: Date,
@@ -49,11 +49,9 @@ const sessionSchema = new Schema<ISession>(
   }
 );
 
-// Query optimization indexes
 sessionSchema.index({ teacherId: 1, startTime: 1 });
 sessionSchema.index({ status: 1, startTime: 1 });
 sessionSchema.index({ userId: 1, status: 1 });
 
-const sessionModel = model<ISession>('Session', sessionSchema);
+const sessionModel = model<ISession>("Session", sessionSchema);
 export default sessionModel;
-

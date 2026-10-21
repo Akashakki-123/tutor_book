@@ -11,4 +11,3 @@ export function returnFormatter<T = unknown>(
 ): FormatterResult<T> {
   return { status, message, data };
 }
-

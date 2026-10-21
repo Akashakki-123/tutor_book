@@ -1,10 +1,7 @@
-import { Request, Response } from 'express';
-import { badRequest, success, unknownError } from '../helpers/response.helper.js';
-import { loginUser } from '../helpers/auth.helper.js';
+import { Request, Response } from "express";
+import { badRequest, success, unknownError } from "../helpers/response.helper.js";
+import { loginUser } from "../helpers/auth.helper.js";
 
-/**
- * POST /auth/login
- */
 export async function login(req: Request, res: Response): Promise<Response> {
   try {
     const { status, message, data } = await loginUser(req);
@@ -13,4 +10,3 @@ export async function login(req: Request, res: Response): Promise<Response> {
     return unknownError(res, error);
   }
 }
-

@@ -1,34 +1,29 @@
-import jwt, { type SignOptions, type Secret } from 'jsonwebtoken';
-import dotenv from 'dotenv';
-import { JwtUserPayload } from '../types/index.js';
+import jwt, { type SignOptions, type Secret } from "jsonwebtoken";
+import dotenv from "dotenv";
+import { JwtUserPayload } from "../types/index.js";
 
 dotenv.config();
 
-const JWT_SECRET: Secret = process.env.JWT_SECRET || 'default_jwt_secret';
-const DEFAULT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+const JWT_SECRET: Secret = process.env.JWT_SECRET || (() => {
+  throw new Error("JWT_SECRET is not defined in environment variables");
+})();
 
-/**
- * Generate a signed JWT token
- */
+const DEFAULT_EXPIRES_IN = (process.env.JWT_EXPIRES_IN || "7d") as SignOptions["expiresIn"];
+
 export function generateToken(payload: JwtUserPayload, options?: SignOptions): string {
   const signOptions: SignOptions = {
-    expiresIn: (options?.expiresIn || DEFAULT_EXPIRES_IN) as SignOptions['expiresIn'],
+    expiresIn: options?.expiresIn || DEFAULT_EXPIRES_IN,
     ...options,
   };
   return jwt.sign(payload, JWT_SECRET, signOptions);
 }
 
-// Alias to preserve original function name
 export const signJwt = generateToken;
 
-/**
- * Verify and decode a JWT token
- * Returns decoded payload if valid, null otherwise
- */
 export function verifyToken(token: string): JwtUserPayload | null {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    if (typeof decoded === 'object' && decoded !== null) {
+    if (typeof decoded === "object" && decoded !== null) {
       return decoded as JwtUserPayload;
     }
     return null;
@@ -37,6 +32,4 @@ export function verifyToken(token: string): JwtUserPayload | null {
   }
 }
 
-// Alias to preserve original function name
 export const verifyJwt = verifyToken;
-

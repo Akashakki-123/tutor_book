@@ -1,6 +1,6 @@
-import { model, Schema, Document } from 'mongoose';
+import { model, Schema, Document } from "mongoose";
 
-export type UserRole = 'USER' | 'TEACHER' | 'ADMIN';
+export type UserRole = "USER" | "TEACHER" | "ADMIN";
 
 export interface IUser extends Document {
   fullName: string;
@@ -16,30 +16,30 @@ const userSchema = new Schema<IUser>(
   {
     fullName: {
       type: String,
-      required: [true, 'Full name is required'],
+      required: [true, "Full name is required"],
       trim: true,
     },
     email: {
       type: String,
-      required: [true, 'Email is required'],
+      required: [true, "Email is required"],
       unique: true,
       lowercase: true,
       trim: true,
     },
     phone: {
       type: String,
-      required: [true, 'Phone number is required'],
+      required: [true, "Phone number is required"],
       trim: true,
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
-      select: false, // Hidden by default in queries and JSON responses
+      required: [true, "Password is required"],
+      select: false,
     },
     role: {
       type: String,
-      enum: ['USER', 'TEACHER', 'ADMIN'],
-      default: 'USER',
+      enum: ["USER", "TEACHER", "ADMIN"],
+      default: "USER",
     },
   },
   {
@@ -48,6 +48,5 @@ const userSchema = new Schema<IUser>(
   }
 );
 
-const userModel = model<IUser>('User', userSchema);
+const userModel = model<IUser>("User", userSchema);
 export default userModel;
-

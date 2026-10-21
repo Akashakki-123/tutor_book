@@ -1,35 +1,30 @@
-import { Request } from 'express';
-import { returnFormatter, FormatterResult } from '../formatters/common.formatter.js';
-import userModel from '../models/user.model.js';
-import { verifyPassword } from '../utils/encrypt.js';
-import { generateToken } from '../utils/jwt.js';
-import { LoginSuccessMessage } from '../constants/messageConstants.js';
+import { Request } from "express";
+import { returnFormatter, FormatterResult } from "../formatters/common.formatter.js";
+import userModel from "../models/user.model.js";
+import { verifyPassword } from "../utils/encrypt.js";
+import { generateToken } from "../utils/jwt.js";
+import { loginSuccessMessage } from "../constants/messageConstants.js";
 
-/**
- * Login user with email and password
- */
 export async function loginUser(req: Request): Promise<FormatterResult> {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return returnFormatter(false, 'Email and password are required');
+      return returnFormatter(false, "Email and password are required");
     }
 
     const normalizedEmail = String(email).toLowerCase().trim();
 
-    // Query user and explicitly select password (since select: false in schema)
-    const user = await userModel.findOne({ email: normalizedEmail }).select('+password');
+    const user = await userModel.findOne({ email: normalizedEmail }).select("+password");
     if (!user || !user.password) {
-      return returnFormatter(false, 'Invalid email or password');
+      return returnFormatter(false, "Invalid email or password");
     }
 
     const isMatch = verifyPassword(String(password), user.password);
     if (!isMatch) {
-      return returnFormatter(false, 'Invalid email or password');
+      return returnFormatter(false, "Invalid email or password");
     }
 
-    // Generate JWT token
     const token = generateToken({
       id: user._id.toString(),
       role: user.role,
@@ -46,10 +41,9 @@ export async function loginUser(req: Request): Promise<FormatterResult> {
       role: user.role,
     };
 
-    return returnFormatter(true, LoginSuccessMessage, data);
+    return returnFormatter(true, loginSuccessMessage, data);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return returnFormatter(false, message);
   }
 }
-

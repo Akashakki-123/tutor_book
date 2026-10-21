@@ -14,4 +14,3 @@ export interface ApiResponse<T = unknown> {
   items?: T;
   tokenInfo?: unknown;
 }
-
